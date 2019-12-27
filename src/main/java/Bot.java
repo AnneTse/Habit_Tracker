@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class Bot extends TelegramLongPollingBot {
-    private static final String BOT_TOKEN = "906957710:AAEe7ifovy3BYeVbzHZZUYDwQ_cAhpg1RaY";
+    private static final String BOT_TOKEN = System.getenv("TOKEN");
     private static final String BOT_USERNAME = "HabitTrackerAnneBot";
 
     public Bot(DefaultBotOptions botOptions) {
