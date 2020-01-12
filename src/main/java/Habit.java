@@ -1,39 +1,31 @@
-import org.telegram.abilitybots.api.db.DBContext;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-
-import java.util.Map;
+import java.time.LocalTime;
 
 public class Habit {
+    private String name;
+    private String[] dayOfTheWeek;
+    private LocalTime time;
 
-    private ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-
-    private Map <Integer,String> HabitMap;
-
-    Habit(DBContext db) {
-        HabitMap = db.getMap("Habit");
+    void setName(String name) {
+        this.name = name;
     }
 
-    public void  addHabit(String habitName) {
-        int q = 0;
-        for (int i : HabitMap.keySet()) {
-            q++;
-        }
-        //HabitMap.put(q, habitName);
-        HabitMap.put(HabitMap.size(), habitName);
+    void setDayOfTheWeek(String[] dayOfTheWeek) {
+        this.dayOfTheWeek = dayOfTheWeek;
     }
 
-    String[] get() {
-        String[] myArray = new String[HabitMap.size()];
-
-        for (int i : HabitMap.keySet()) {
-            myArray[i] = (HabitMap.get(i));
-        }
-        return myArray;
+    void setTime(LocalTime time) {
+        this.time = time;
     }
 
-    public void remove() {
-        for (int i : HabitMap.keySet()) {
-            HabitMap.remove(i);
-        }
+    String getName() {
+        return name;
+    }
+
+   String[] getDayOfTheWeek() {
+        return dayOfTheWeek;
+   }
+
+    LocalTime getTime() {
+        return time;
     }
 }
