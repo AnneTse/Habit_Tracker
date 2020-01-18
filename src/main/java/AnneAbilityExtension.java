@@ -6,57 +6,72 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class AnneAbilityExtension  implements AbilityExtension  {
+public class AnneAbilityExtension  implements AbilityExtension {
 
+    public static final String NEW_HABIT = "newHabit";
+    private static final String TABLE_USERS_ID = "usersId";
     private ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
     private SilentSender silent;
     private DBContext db;
-    private String[] habits = {"Бросить курить", "Заняться спортом"};
+    private List<String> habits = Arrays.asList("quit smoking", "workout", "drink water", "Add new habit");
 
     AnneAbilityExtension(SilentSender silent, DBContext db) {
         this.silent = silent;
         this.db = db;
-        ReminderTime reminderTime = new ReminderTime(db,silent);
+        ReminderTime reminderTime = new ReminderTime(db, silent);
     }
 
-    /**Start*/
-    public Reply start() {
-        return Reply.of(update -> {
-            Map<Integer, Integer> users = db.getMap("usersId");
-            if (!users.containsValue(update.getMessage().getFrom().getId())) {
-                users.put(users.size(), update.getMessage().getFrom().getId());
+    /** Start*/
+    public Ability start() {
+        return Ability
+        .builder()
+        .name("start")
+        .locality(Locality.ALL)
+        .privacy(Privacy.PUBLIC)
+        .action(ctx -> {
+            Map<Integer, Integer> users = db.getMap(TABLE_USERS_ID);
+            if (!users.containsValue(ctx.user().getId())) {
+                users.put(users.size(), ctx.user().getId());
             }
-            SendMessage sendMessage = new SendMessage().setChatId(update.getMessage().getChatId());
-            sendMessage.setText("Доброго времени суток, этот бот поможет Вам освоить полезные привычки." +
-                    "Вы можете выбрать нужную из меню снизу или создать свою. \n\n" +
-                    "Чтобы вывести список ваших привычек напишите /myHabits \n" +
-                    "Для удалвения всех превычек введите /delete \n" +
-                    "Чтобы трекнуть освоенную привычку напишите /mark \n");
+            SendMessage sendMessage = new SendMessage().setChatId(ctx.chatId());
+            sendMessage.setText("Good day. This bot will help you master new good habits." +
+                    "You can choose a ready-made habit or crate your own. \n\n" +
+                    "If you want display your habits write /myhabits \n" +
+                    "To remove all habits write /delete \n" +
+                    "To mark your habit type /mark \n");
             sendMessage.setReplyMarkup(replyKeyboardMarkup);
-            addKeyboard(replyKeyboardMarkup, new String[]{"Бросить курить", "Заняться спортом", "Add new habit"});
+            addKeyboard(replyKeyboardMarkup, new String[]{"quit smoking", "workout", "drink water", "Add new habit"});
             silent.execute(sendMessage);
-        }, update -> update.getMessage().getText().equals("/start"));
+        })
+        .build();
     }
 
     /**мои привычки*/
-    public Reply myHabit() {
-        return Reply.of(update -> {
-            long userId = update.getMessage().getFrom().getId();
-            Map <Integer,String[]> userHabits = db.getMap(String.valueOf(userId));
-            /**вывод списка привычек на экран*/
+    public Ability myHabit() {
+        return Ability
+        .builder()
+        .name("myhabits")
+        .locality(Locality.ALL)
+        .privacy(Privacy.PUBLIC)
+        .input(0)
+        .action(ctx -> {
+            long userId = ctx.user().getId();
+            Map <Integer, String[]> userHabits = db.getMap(String.valueOf(userId));
             String q = "";
-            for (int i: userHabits.keySet()){
+            for (int i : userHabits.keySet()) {
                 q += "Habit:  " + userHabits.get(i)[0] +
-                        "\n Days:  " + userHabits.get(i)[1] +
-                        "\n Time:  " + userHabits.get(i)[2] + "\n\n";
-            }
-            silent.send((q), update.getMessage().getChatId());
-        }, update -> update.getMessage().getText().equals("/myHabits"));
+                      "\n Days:  " + userHabits.get(i)[1] +
+                      "\n Time:  " + userHabits.get(i)[2] + "\n\n";
+                }
+            silent.send((q), ctx.chatId());
+        })
+        .build();
     }
 
     /**добавление привычки*/
@@ -65,66 +80,87 @@ public class AnneAbilityExtension  implements AbilityExtension  {
             Integer userId = update.getMessage().getFrom().getId();
             String message = update.getMessage().getText();
 
-            Map<Integer, String[]> newHabit = db.getMap("newHabit");
+            Map<Integer, String[]> newHabit = db.getMap(NEW_HABIT);
 
-            if (Arrays.asList(habits).contains(message)) {
-                newHabit.put(userId,new String[]{message, null, null});
-                silent.send("Выберете день недели или перечислите нужные через пробел (Например: Понедельник Среда)", update.getMessage().getChatId());
+            if (habits.contains(message)) {
+                newHabit.put(userId, new String[]{message, null, null});
+                silent.send("Write the day of the week (for example: Monday)", update.getMessage().getChatId());
             } else if (message.equals("Add new habit")) {
                 newHabit.put(userId, new String[]{null, null, null});
-                silent.send("Введите название привычки",update.getMessage().getChatId());
+                silent.send("Enter a name of the habit", update.getMessage().getChatId());
             } else if (newHabit.containsKey(userId)) {
-                if (newHabit.get(userId)[0] == null) {
-                    newHabit.put(userId, new String[] {message, null, null});
-                    silent.send("Введите день недели или перечислите нужные через пробел (Например: Понедельник Среда)", update.getMessage().getChatId());
-                }  else if (newHabit.get(userId)[1] == null) {
-                    newHabit.put(userId, new String[] {newHabit.get(userId)[0], message, null});
-                    silent.send("Введите время в формате чч:мм (Например: 03:09)", update.getMessage().getChatId());
-                }  else if (newHabit.get(userId)[2] == null) {
-                    newHabit.put(userId, new String[] { newHabit.get(userId)[0], newHabit.get(userId)[1], message});
 
-                    Map<Integer, String[]> userHabits;
-                    userHabits = db.getMap(String.valueOf(userId));
+                Habit habit = new Habit();
+                habit.setName(newHabit.get(userId)[0]);
+
+                if (newHabit.get(userId)[1] != null ) {
+                    habit.setDayOfTheWeek(newHabit.get(userId)[1]);
+                } else {
+                    habit.setDayOfTheWeek(null);
+                }
+
+                if (newHabit.get(userId)[2] != null ) {
+                    habit.setTime(LocalTime.parse(newHabit.get(userId)[2]));
+                } else {
+                    habit.setTime(null);
+                }
+
+                if (habit.getName() == null) {
+                    newHabit.put(userId, new String[]{message, null, null});
+                    silent.send("Write the day of the week or list (for example: Monday)", update.getMessage().getChatId());
+                } else if (habit.getDayOfTheWeek() == null) {
+                    newHabit.put(userId, new String[]{habit.getName(), message, null});
+                    silent.send("Enter the time in the format hh:mm (for example: 03:09)", update.getMessage().getChatId());
+                } else if (habit.getTime() == null) {
+                    newHabit.put(userId, new String[]{habit.getName(), habit.getDayOfTheWeek(), message});
+
+                    Map<Integer, String[]> userHabits = db.getMap(String.valueOf(userId));
                     userHabits.put(userHabits.size(), newHabit.get(userId));
                     newHabit.remove(userId);
-
-                    silent.send("Вы создали привычку и теперь постарайтесь следовать ей", update.getMessage().getChatId());
+                    silent.send("Congratulations! You made a habit!", update.getMessage().getChatId());
                 }
             }
-        }, Flag.TEXT);
+        }, Flag.TEXT,
+        update -> !update.getMessage().getText().startsWith("/"));
     }
 
-    /**Удаление всех привычек пользователей*/
-//    public Reply deleteAllHabits() {
-//        return Reply.of(update -> {
-//            Map<Integer, Integer> users = db.getMap("usersId");
-//            Map<Integer,String[]> newHabit = db.getMap("Add new habit");
-//
-//            for (int i : users.keySet()) {
-//                newHabit.remove(i);
-//
-//                Map<Integer, String[]> userHabits = db.getMap(String.valueOf(users.get(i)));
-//
-//                for (int j : userHabits.keySet()) {
-//                    userHabits.remove(i);
-//                }
-//            }
-//            silent.send("Привычки всех пользователей удалены", update.getMessage().getChatId());
-//        }, update -> update.getMessage().getText().equals("/deleteAll"));
-//    }
-    /**Удаление моих привычек*/
-    public Reply deleteHabits() {
+    /** Удаление всех привычек пользователей*/
+    public Reply deleteAllHabits() {
         return Reply.of(update -> {
-            Integer userId = update.getMessage().getFrom().getId();
-            Map<Integer,String[]> newHabit = db.getMap(String.valueOf(userId));
+            Map<Integer, Integer> users = db.getMap(TABLE_USERS_ID);
+            Map<Integer, String[]> newHabit = db.getMap("Add new habit");
 
-            for (int i: newHabit.keySet()) {
+            for (int i : users.keySet()) {
+                newHabit.remove(i);
+
+                Map<Integer, String[]> userHabits = db.getMap(String.valueOf(users.get(i)));
+
+                for (int j : userHabits.keySet()) {
+                    userHabits.remove(j);
+                }
+            }
+            silent.send("Привычки всех пользователей удалены", update.getMessage().getChatId());
+        }, update -> update.getMessage().getText().equals("/deleteAll"));
+    }
+
+    /**Удаление моих привычек*/
+    public Ability delete() {
+        return Ability
+        .builder()
+        .name("delete")
+        .locality(Locality.ALL)
+        .privacy(Privacy.PUBLIC)
+        .action(ctx -> {
+            Integer userId = ctx.user().getId();
+            Map<Integer, String[]> newHabit = db.getMap(String.valueOf(userId));
+
+            for (int i : newHabit.keySet()) {
                 newHabit.remove(i);
             }
-            silent.send("Все ваши привычки удалены", update.getMessage().getChatId());
-        }, update -> update.getMessage().getText().equals("/delete"));
+            silent.send("Все ваши привычки удалены", ctx.chatId());
+            })
+        .build();
     }
-
 
     public static ReplyKeyboardMarkup addKeyboard(ReplyKeyboardMarkup replyKeyboardMarkup, String[] text) {
         List<KeyboardRow> keyboard = new ArrayList<>();
@@ -133,22 +169,39 @@ public class AnneAbilityExtension  implements AbilityExtension  {
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setOneTimeKeyboard(false);
 
-        keyboard.clear();
-        keyboardRow.clear();
         for (String s : text) {
             keyboardRow.add(s);
             keyboard.add(keyboardRow);
             keyboardRow = new KeyboardRow();
         }
+
         replyKeyboardMarkup.setKeyboard(keyboard);
         return replyKeyboardMarkup;
     }
 
-    public Reply dHabit() {
-        return Reply.of(update -> {
-            silent.execute(InlineKeyboard.withButtons(update.getMessage().getFrom().getId(), db));
-        }, update -> update.getMessage().getText().equals("/mark"));
+    public Ability dHabit() {
+        return Ability
+        .builder()
+        .name("mark")
+        .locality(Locality.ALL)
+        .privacy(Privacy.PUBLIC)
+        .action(ctx -> {
+             silent.execute(InlineKeyboard.withButtons(ctx.user().getId(), db));
+        })
+        .build();
     }
 
+    public Reply trHabit() {
+        return Reply.of(update -> {
+            String callBackId = update.getCallbackQuery().getData();
+            Integer userId = update.getMessage().getFrom().getId();
+            Map <Integer, String[]> userHabits = db.getMap(String.valueOf(userId));
 
+            for (int i : userHabits.keySet()) {
+                if (userHabits.get(i)[0].equals(callBackId)) {
+                    userHabits.remove(i);
+                }
+            }
+        }, Flag.CALLBACK_QUERY);
+    }
 }

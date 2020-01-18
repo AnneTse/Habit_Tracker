@@ -1,4 +1,7 @@
 import org.telegram.abilitybots.api.bot.AbilityBot;
+import org.telegram.abilitybots.api.objects.Ability;
+import org.telegram.abilitybots.api.objects.Locality;
+import org.telegram.abilitybots.api.objects.Privacy;
 import org.telegram.abilitybots.api.util.AbilityExtension;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 
@@ -9,6 +12,7 @@ public class AnneAbilityBot extends AbilityBot {
     protected AnneAbilityBot (DefaultBotOptions botOptions) {
         super(BOT_TOKEN, BOT_USERNAME, botOptions);
     }
+
      public AbilityExtension ability() {
         return new AnneAbilityExtension(silent, db);
      }

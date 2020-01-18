@@ -2,14 +2,15 @@ import java.time.LocalTime;
 
 public class Habit {
     private String name;
-    private String[] dayOfTheWeek;
+    private String dayOfTheWeek;
     private LocalTime time;
 
+    /**конструктор*/
     void setName(String name) {
         this.name = name;
     }
 
-    void setDayOfTheWeek(String[] dayOfTheWeek) {
+    void setDayOfTheWeek(String dayOfTheWeek) {
         this.dayOfTheWeek = dayOfTheWeek;
     }
 
@@ -21,7 +22,7 @@ public class Habit {
         return name;
     }
 
-   String[] getDayOfTheWeek() {
+   String getDayOfTheWeek() {
         return dayOfTheWeek;
    }
 

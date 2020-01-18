@@ -15,11 +15,11 @@ public class InlineKeyboard {
         Map<Integer, String[]> userHabits = db.getMap(String.valueOf(userId));
 
         for (int i : userHabits.keySet()) {
-            List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-            keyboardButtonsRow1.add(new InlineKeyboardButton(userHabits.get(i)[0]).setCallbackData(userHabits.get(i)[0]));
-            rowList.add(keyboardButtonsRow1);
+            List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
+            keyboardButtonsRow.add(new InlineKeyboardButton(userHabits.get(i)[0]).setCallbackData(userHabits.get(i)[0]));
+            rowList.add(keyboardButtonsRow);
         }
         inlineKeyboardMarkup.setKeyboard(rowList);
-        return new SendMessage().setChatId(userId).setText("Отметьте освоенную привычку").setReplyMarkup(inlineKeyboardMarkup);
+        return new SendMessage().setChatId(userId).setText("Mark your habit").setReplyMarkup(inlineKeyboardMarkup);
     }
 }

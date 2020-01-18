@@ -8,9 +8,12 @@ import java.util.*;
 /**Класс отвечающий напоминания*/
 public class ReminderTime {
     public ReminderTime(DBContext db, SilentSender silent) {
+
         Habit habit = new Habit();
+
         TimerTask newTask = new TimerTask() {
             @Override
+
             public void run() {
                 LocalTime time = LocalTime.now(ZoneId.systemDefault());
                 Map<Integer, Integer> users = db.getMap("usersId");
@@ -18,7 +21,7 @@ public class ReminderTime {
                     Map<Integer, String[]> userHabits = db.getMap(String.valueOf(users.get(i)));
                     for (int j :  userHabits.keySet()) {
                         habit.setName(userHabits.get(j)[0]);
-                        habit.setDayOfTheWeek(userHabits.get(j)[1].split(" "));
+                        habit.setDayOfTheWeek(userHabits.get(j)[1]);
                         habit.setTime(LocalTime.parse(userHabits.get(j)[2]));
 
                         String day = weekDay();
