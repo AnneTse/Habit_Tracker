@@ -139,7 +139,7 @@ public class AnneAbilityExtension  implements AbilityExtension {
                     userHabits.remove(j);
                 }
             }
-            silent.send("Привычки всех пользователей удалены", update.getMessage().getChatId());
+            silent.send("\n" + "Habits of all users are extended", update.getMessage().getChatId());
         }, update -> update.getMessage().getText().equals("/deleteAll"));
     }
 
@@ -157,7 +157,7 @@ public class AnneAbilityExtension  implements AbilityExtension {
             for (int i : newHabit.keySet()) {
                 newHabit.remove(i);
             }
-            silent.send("Все ваши привычки удалены", ctx.chatId());
+            silent.send("\n" + "All your habits removed", ctx.chatId());
             })
         .build();
     }

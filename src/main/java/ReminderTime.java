@@ -29,7 +29,7 @@ public class ReminderTime {
                         if (Arrays.asList(habit.getDayOfTheWeek()).contains(day) &&
                         habit.getTime().getHour() == time.getHour() &&
                         habit.getTime().getMinute() == time.getMinute()) {
-                            silent.send(("Напоминаем о том, что вы планируте " + userHabits.get(j)[0]), users.get(i));
+                            silent.send(("We remind you that you plan to " + userHabits.get(j)[0]), users.get(i));
                         }
                     }
                 }
@@ -41,13 +41,13 @@ public class ReminderTime {
 
     private String weekDay() {
         switch (Calendar.getInstance().get(Calendar.DAY_OF_WEEK)){
-            case 1: return "Воскресенье";
-            case 2: return "Понедельник";
-            case 3: return "Вторник";
-            case 4: return "Среда";
-            case 5: return "Четверг";
-            case 6: return "Пятница";
-            case 7: return "Суббота";
+            case 1: return "Sunday";
+            case 2: return "Monday";
+            case 3: return "Tuesday";
+            case 4: return "Wednesday";
+            case 5: return "Thursday";
+            case 6: return "Friday";
+            case 7: return "Saturday";
             default: return "";
         }
     }
