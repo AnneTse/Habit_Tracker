@@ -26,7 +26,7 @@ public class Habit {
         return dayOfTheWeek;
    }
 
-    LocalTime getTime() {
+   LocalTime getTime() {
         return time;
     }
 }

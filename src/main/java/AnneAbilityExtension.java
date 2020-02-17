@@ -19,7 +19,7 @@ public class AnneAbilityExtension  implements AbilityExtension {
     private ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
     private SilentSender silent;
     private DBContext db;
-    private List<String> habits = Arrays.asList("quit smoking", "workout", "drink water", "Add new habit");
+    private List<String> habits = Arrays.asList("quit smoking", "workout", "drink water");
 
     AnneAbilityExtension(SilentSender silent, DBContext db) {
         this.silent = silent;
@@ -75,54 +75,96 @@ public class AnneAbilityExtension  implements AbilityExtension {
     }
 
     /**добавление привычки*/
+//    public Reply addHabit() {
+//        return Reply.of(update -> {
+//            Integer userId = update.getMessage().getFrom().getId();
+//            String message = update.getMessage().getText();
+//
+//            Map<Integer, String[]> newHabit = db.getMap(NEW_HABIT);
+//
+//            if (habits.contains(message)) {
+//                newHabit.put(userId, new String[]{message, null, null});
+//                silent.send("Write the day of the week (for example: Monday)", update.getMessage().getChatId());
+//            } else if (message.equals("Add new habit")) {
+//                newHabit.put(userId, new String[]{null, null, null});
+//                silent.send("Enter a name of the habit", update.getMessage().getChatId());
+//            } else if (newHabit.containsKey(userId)) {
+//
+//                Habit habit = new Habit();
+//                habit.setName(newHabit.get(userId)[0]);
+//
+//                if (newHabit.get(userId)[1] != null ) {
+//                    habit.setDayOfTheWeek(newHabit.get(userId)[1]);
+//                } else {
+//                    habit.setDayOfTheWeek(null);
+//                }
+//
+//                if (newHabit.get(userId)[2] != null ) {
+//                    habit.setTime(LocalTime.parse(newHabit.get(userId)[2]));
+//                } else {
+//                    habit.setTime(null);
+//                }
+//
+//                if (habit.getName() == null) {
+//                    newHabit.put(userId, new String[]{message, null, null});
+//                    silent.send("Write the day of the week or list (for example: Monday)", update.getMessage().getChatId());
+//                } else if (habit.getDayOfTheWeek() == null) {
+//                    newHabit.put(userId, new String[]{habit.getName(), message, null});
+//                    silent.send("Enter the time in the format hh:mm (for example: 03:09)", update.getMessage().getChatId());
+//                } else if (habit.getTime() == null) {
+//                    newHabit.put(userId, new String[]{habit.getName(), habit.getDayOfTheWeek(), message});
+//
+//                    Map<Integer, String[]> userHabits = db.getMap(String.valueOf(userId));
+//                    userHabits.put(userHabits.size(), newHabit.get(userId));
+//                    newHabit.remove(userId);
+//                    silent.send("Congratulations! You made a habit!", update.getMessage().getChatId());
+//                }
+//            }
+//        }, Flag.TEXT,
+//        update -> !update.getMessage().getText().startsWith("/"));
+//    }
+
+
     public Reply addHabit() {
         return Reply.of(update -> {
-            Integer userId = update.getMessage().getFrom().getId();
-            String message = update.getMessage().getText();
+                    Integer userId = update.getMessage().getFrom().getId();
+                    String message = update.getMessage().getText();
 
-            Map<Integer, String[]> newHabit = db.getMap(NEW_HABIT);
+                    Map <Integer, Habit> newHabit = db.getMap(NEW_HABIT);
 
-            if (habits.contains(message)) {
-                newHabit.put(userId, new String[]{message, null, null});
-                silent.send("Write the day of the week (for example: Monday)", update.getMessage().getChatId());
-            } else if (message.equals("Add new habit")) {
-                newHabit.put(userId, new String[]{null, null, null});
-                silent.send("Enter a name of the habit", update.getMessage().getChatId());
-            } else if (newHabit.containsKey(userId)) {
+                    Habit habit = new Habit();
 
-                Habit habit = new Habit();
-                habit.setName(newHabit.get(userId)[0]);
+                    if (habits.contains(message)) {
+                        habit.setName(message);
+                        silent.send("Write the day of the week (for example: Monday)", update.getMessage().getChatId());
+                    } else if (message.equals("Add new habit")) {
+                        newHabit.put(userId, habit);
+                        silent.send("Enter a name of the habit", update.getMessage().getChatId());
+                    } else if (newHabit.containsKey(userId)) {
 
-                if (newHabit.get(userId)[1] != null ) {
-                    habit.setDayOfTheWeek(newHabit.get(userId)[1]);
-                } else {
-                    habit.setDayOfTheWeek(null);
-                }
+                        habit = newHabit.get(userId);
 
-                if (newHabit.get(userId)[2] != null ) {
-                    habit.setTime(LocalTime.parse(newHabit.get(userId)[2]));
-                } else {
-                    habit.setTime(null);
-                }
+                        if (habit.getName() == null) {
+                            habit.setName(message);
+                            newHabit.put(userId, habit);
+                            silent.send("Write the day of the week or list (for example: Monday)", update.getMessage().getChatId());
+                        } else if (habit.getDayOfTheWeek() == null) {
+                            habit.setDayOfTheWeek(message);
+                            newHabit.put(userId, habit);
+                            silent.send("Enter the time in the format hh:mm (for example: 03:09)", update.getMessage().getChatId());
+                        } else if (habit.getTime() == null) {
 
-                if (habit.getName() == null) {
-                    newHabit.put(userId, new String[]{message, null, null});
-                    silent.send("Write the day of the week or list (for example: Monday)", update.getMessage().getChatId());
-                } else if (habit.getDayOfTheWeek() == null) {
-                    newHabit.put(userId, new String[]{habit.getName(), message, null});
-                    silent.send("Enter the time in the format hh:mm (for example: 03:09)", update.getMessage().getChatId());
-                } else if (habit.getTime() == null) {
-                    newHabit.put(userId, new String[]{habit.getName(), habit.getDayOfTheWeek(), message});
-
-                    Map<Integer, String[]> userHabits = db.getMap(String.valueOf(userId));
-                    userHabits.put(userHabits.size(), newHabit.get(userId));
-                    newHabit.remove(userId);
-                    silent.send("Congratulations! You made a habit!", update.getMessage().getChatId());
-                }
-            }
-        }, Flag.TEXT,
-        update -> !update.getMessage().getText().startsWith("/"));
+                            newHabit.put(userId, habit);
+                            Map<Integer, Habit> userHabits = db.getMap(String.valueOf(userId));
+                            userHabits.put(userHabits.size(), newHabit.get(userId));
+                            newHabit.remove(userId);
+                            silent.send("Congratulations! You made a habit!", update.getMessage().getChatId());
+                        }
+                    }
+                }, Flag.TEXT,
+                update -> !update.getMessage().getText().startsWith("/"));
     }
+
 
     /** Удаление всех привычек пользователей*/
     public Reply deleteAllHabits() {

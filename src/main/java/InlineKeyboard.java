@@ -15,7 +15,7 @@ public class InlineKeyboard {
         Map<Integer, String[]> userHabits = db.getMap(String.valueOf(userId));
 
         for (int i : userHabits.keySet()) {
-            List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
+            List <InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
             keyboardButtonsRow.add(new InlineKeyboardButton(userHabits.get(i)[0]).setCallbackData(userHabits.get(i)[0]));
             rowList.add(keyboardButtonsRow);
         }
