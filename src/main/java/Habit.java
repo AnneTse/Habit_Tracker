@@ -1,10 +1,10 @@
+import java.io.Serializable;
 import java.time.LocalTime;
-
-public class Habit {
+public class Habit implements Serializable {
     private String name;
     private String dayOfTheWeek;
     private LocalTime time;
-
+    private static final long serialVersionUID = -2529999418945499244L;
     /**конструктор*/
     void setName(String name) {
         this.name = name;
