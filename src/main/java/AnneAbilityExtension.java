@@ -82,7 +82,7 @@ public class AnneAbilityExtension  implements AbilityExtension {
                     String message = update.getMessage().getText();
 
                     Map <Integer, Habit> newHabit = db.getMap(NEW_HABIT);
-                    
+
                     if (habits.contains(message)) {
                         Habit habit = new Habit();
                         habit.setName(message);

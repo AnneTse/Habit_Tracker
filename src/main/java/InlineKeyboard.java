@@ -12,11 +12,12 @@ public class InlineKeyboard {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
-        Map<Integer, String[]> userHabits = db.getMap(String.valueOf(userId));
+        Map<Integer, Habit> userHabits = db.getMap(String.valueOf(userId));
 
         for (int i : userHabits.keySet()) {
             List <InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
-            keyboardButtonsRow.add(new InlineKeyboardButton(userHabits.get(i)[0]).setCallbackData(userHabits.get(i)[0]));
+            Habit habit = userHabits.get(i);
+            keyboardButtonsRow.add(new InlineKeyboardButton(habit.getName()).setCallbackData(habit.getName()));
             rowList.add(keyboardButtonsRow);
         }
         inlineKeyboardMarkup.setKeyboard(rowList);

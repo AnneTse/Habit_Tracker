@@ -5,7 +5,6 @@ public class Habit implements Serializable {
     private String dayOfTheWeek;
     private LocalTime time;
     private static final long serialVersionUID = -2529999418945499244L;
-    /**конструктор*/
     void setName(String name) {
         this.name = name;
     }

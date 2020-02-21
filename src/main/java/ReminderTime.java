@@ -5,7 +5,6 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
 
-/**Класс отвечающий напоминания*/
 public class ReminderTime {
     public ReminderTime(DBContext db, SilentSender silent) {
 
